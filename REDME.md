@@ -17,4 +17,4 @@ Este proyecto predice qué clientes pueden abandonar un servicio (churn).
 4. Evaluar: `docker exec churn_mlops_api python src/evaluar_modelo.py`
 5. Abrir API: `http://localhost:8000/docs`
 ## Control de version
-Este proyecto utliza git para registrar cambios
+Este proyecto utliza git para registrar cambios de todo el proyecto
