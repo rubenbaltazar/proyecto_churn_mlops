@@ -1,0 +1,27 @@
+﻿version: '3.8'
+
+services:
+  # Nombre del servicio
+  churn-mlops:
+    # Construir usando el Dockerfile de esta carpeta
+    build: .
+    
+    # Nombre del contenedor (para referenciarlo fácilmente)
+    container_name: churn_mlops_api
+    
+    # Mapear puerto: (puerto_host:puerto_contenedor)
+    ports:
+      - "8000:8000"
+    
+    # Volúmenes para persistir datos (opcional)
+    volumes:
+      - ./data:/app/data
+      - ./models:/app/models
+      - ./docs:/app/docs
+    
+    # Variables de entorno
+    environment:
+      - PYTHONUNBUFFERED=1
+    
+    # Reiniciar automáticamente si se cae
+    restart: unless-stopped
