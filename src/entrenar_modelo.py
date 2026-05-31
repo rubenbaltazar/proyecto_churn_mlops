@@ -30,10 +30,20 @@ def entrenar_modelo():
     y = df["churn"]
     
     # Crear pipeline: primero escala los datos, luego aplica regresión logística
+    #modelo = Pipeline(
+    #    steps=[
+   #         ("escalado", StandardScaler()),
+   #         ("clasificador", LogisticRegression())
+    #    ]
+   # )
+    # Crear pipeline: primero escala los datos, luego aplica regresión logística con hiperparámetros modificados
     modelo = Pipeline(
         steps=[
             ("escalado", StandardScaler()),
-            ("clasificador", LogisticRegression())
+            (
+                "clasificador",
+                LogisticRegression(C=0.01, solver="liblinear", random_state=42),
+            ),
         ]
     )
     
