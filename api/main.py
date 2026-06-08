@@ -11,7 +11,7 @@ MODEL_FILE = BASE_DIR / "models" / "modelo_churn.pkl"
 # Crear la aplicación FastAPI
 app = FastAPI(
     title="API de Predicción de Churn",
-    version="0.1.0",
+    version="2",
     description="API para predecir si un cliente abandonará el servicio"
 )
 
@@ -29,10 +29,14 @@ def cargar_modelo():
         return None
     return joblib.load(MODEL_FILE)
 
+
 @app.get("/")
 def inicio():
-    """Endpoint de bienvenida"""
-    return {"mensaje": "API de predicción de churn activa-ACTUALIZADA 2"}
+    return {
+        "mensaje": "Servicio ML-Ops activo",
+        "estado": "ok",
+        "autor": "Ruben Baltazar Balderrama"
+    }
 
 @app.get("/health")
 def health():
