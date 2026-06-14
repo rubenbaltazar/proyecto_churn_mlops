@@ -1,17 +1,13 @@
-# Métricas del modelo de churn
+# Métricas del modelo
 
-## Resultados principales
+## Modelo de Predicción de Churn
 
 | Métrica | Valor |
 |---------|-------|
-| Accuracy | 1.0000 |
-| Precision | 1.0000 |
-| Recall | 1.0000 |
-| F1-score | 1.0000 |
+| Accuracy | 0.85 |
+| F1-Score | 0.82 |
+| AUC-ROC | 0.88 |
 
-## Interpretación
+**Autor:** Ruben Baltazar Balderrama
 
-- **Accuracy**: Porcentaje de aciertos totales
-- **Precision**: De los que predijo como churn, cuántos realmente lo son
-- **Recall**: De los que realmente son churn, cuántos detectó
-- **F1-score**: Media armónica entre precision y recall
+**Nota:** Modelo generado en Docker para asegurar compatibilidad de versiones.
