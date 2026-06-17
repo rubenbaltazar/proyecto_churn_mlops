@@ -2,12 +2,12 @@
 
 services:
   # Nombre del servicio
-  churn-mlops:
+  churn-api-baltazar:
     # Construir usando el Dockerfile de esta carpeta
     build: .
     
     # Nombre del contenedor (para referenciarlo fácilmente)
-    container_name: churn_mlops_api
+    container_name: churn_mlops_api_baltazar
     
     # Mapear puerto: (puerto_host:puerto_contenedor)
     ports:

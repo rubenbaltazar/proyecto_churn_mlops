@@ -19,17 +19,17 @@ from pydantic import BaseModel, Field
 # ============================================================
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 
-# Ruta del modelo serializado
-MODEL_PATH = PROJECT_ROOT / "models" / "modelo_churn_v1.joblib"
+# Ruta del modelo serializado (tu modelo original)
+MODEL_PATH = PROJECT_ROOT / "models" / "modelo_churn.pkl"
 
 LOGS_DIR = PROJECT_ROOT / "logs"
 LOG_FILE = LOGS_DIR / "monitor_api.log"
 
 VERSION_MODELO = "modelo_churn_v1"
-AUTOR = "Ruben Baltazar Balderrama"
+AUTOR = "Ruben Baltazar Balderrama"  # 👈 Tu nombre completo
 
 # ============================================================
-# BLOQUE 3. RANGOS HISTÓRICOS DE REFERENCIA
+# BLOQUE 3. RANGOS HISTÓRICOS DE REFERENCIA (para 5 variables)
 # ============================================================
 RANGOS_HISTORICOS = {
     "edad": (18, 100),
@@ -86,7 +86,7 @@ metricas = {
 metricas_lock = Lock()
 
 # ============================================================
-# BLOQUE 7. MODELOS DE DATOS Y VALIDACIÓN DE ENTRADAS
+# BLOQUE 7. MODELOS DE DATOS Y VALIDACIÓN DE ENTRADAS (5 VARIABLES)
 # ============================================================
 class ClienteEntrada(BaseModel):
     edad: int = Field(..., ge=18, le=100, description="Edad del cliente en años")
@@ -101,8 +101,6 @@ class PrediccionSalida(BaseModel):
     version_modelo: str
     autor: str
     alertas_datos: list[str]
-    nivel_riesgo: str
-    recomendacion: str
 
 # ============================================================
 # BLOQUE 8. DETECCIÓN DE VALORES FUERA DEL RANGO HISTÓRICO
@@ -148,24 +146,7 @@ def resumen_metricas() -> dict:
 # ============================================================
 app = FastAPI(
     title="API de predicción de churn - Ruben Baltazar",
-    description="""
-    ## 📊 Servicio de Predicción de Churn
-    
-    ### Características:
-    - 🚀 **Predicción en tiempo real** de riesgo de abandono
-    - 📈 **Monitoreo continuo** con métricas y logs
-    - ⚠️ **Detección de anomalías** en datos de entrada
-    - 🐳 **Contenerizado con Docker** para portabilidad
-    
-    ### Mejoras implementadas:
-    - 🔹 Endpoint `/info` con metadatos del proyecto
-    - 🔹 Endpoint `/metrics` con estadísticas de uso
-    - 🔹 Endpoint `/model-version` con detalles del modelo
-    - 🔹 Respuesta enriquecida con nivel de riesgo y recomendación
-    
-    ### Autor:
-    **Ruben Baltazar Balderrama**
-    """,
+    description="Servicio académico ML-Ops con métricas, logs y detección de anomalías.",
     version="2.0.0",
 )
 
@@ -218,7 +199,7 @@ async def registrar_error_validacion(request: Request, exc: RequestValidationErr
     return await request_validation_exception_handler(request, exc)
 
 # ============================================================
-# BLOQUE 13. ENDPOINTS INFORMATIVOS
+# BLOQUE 13. ENDPOINT DE INICIO
 # ============================================================
 @app.get("/")
 def inicio() -> dict[str, str]:
@@ -227,32 +208,14 @@ def inicio() -> dict[str, str]:
         "estado": "ok",
         "autor": AUTOR,
     }
-
 @app.get("/info")
-async def get_info() -> dict:
-    """Información general del proyecto - MEJORA PERSONAL"""
+async def get_info():
     return {
         "proyecto": "Churn Prediction API",
         "autor": "Ruben Baltazar Balderrama",
-        "version": "1.0.0",
-        "fecha_implementacion": "2026-06-15",
-        "tecnologias": ["FastAPI", "Docker", "Scikit-learn", "Joblib"],
-        "endpoints": ["/", "/health", "/info", "/model-version", "/metrics", "/predict", "/docs"]
+        "version": "1.0.0"
+        
     }
-
-@app.get("/model-version")
-async def model_version() -> dict:
-    """Información detallada de la versión del modelo - MEJORA PERSONAL"""
-    return {
-        "version": VERSION_MODELO,
-        "autor": AUTOR,
-        "fecha_carga": "2026-06-15",
-        "tipo_modelo": "RandomForestClassifier",
-        "caracteristicas": ["edad", "antiguedad_meses", "saldo_promedio", "reclamos", "usa_app"],
-        "umbral_riesgo": 0.50,
-        "endpoints_disponibles": ["/", "/health", "/info", "/model-version", "/metrics", "/predict", "/docs"]
-    }
-
 # ============================================================
 # BLOQUE 14. ENDPOINT DE SALUD
 # ============================================================
@@ -273,7 +236,7 @@ def metrics() -> dict:
     return resumen_metricas()
 
 # ============================================================
-# BLOQUE 16. ENDPOINT POST /PREDICT (MEJORADO)
+# BLOQUE 16. ENDPOINT POST /PREDICT
 # ============================================================
 @app.post("/predict", response_model=PrediccionSalida)
 def predict(datos: ClienteEntrada) -> PrediccionSalida:
@@ -293,23 +256,8 @@ def predict(datos: ClienteEntrada) -> PrediccionSalida:
         # Paso 3. Calcular la probabilidad de abandono (clase 1)
         probabilidad = float(modelo.predict_proba(X)[0][1])
  
-        # Paso 4. Aplicar umbrales de decisión con niveles de riesgo
-        if probabilidad >= 0.70:
-            etiqueta = "alto_riesgo"
-            nivel_riesgo = "CRITICO"
-            recomendacion = "Acción inmediata: contactar al cliente y ofrecer incentivos"
-        elif probabilidad >= 0.50:
-            etiqueta = "alto_riesgo"
-            nivel_riesgo = "ALTO"
-            recomendacion = "Monitorear comportamiento y enviar encuesta de satisfacción"
-        elif probabilidad >= 0.30:
-            etiqueta = "bajo_riesgo"
-            nivel_riesgo = "MEDIO"
-            recomendacion = "Mantener comunicación regular y ofrecer beneficios"
-        else:
-            etiqueta = "bajo_riesgo"
-            nivel_riesgo = "BAJO"
-            recomendacion = "Cliente fidelizado, mantener estrategia actual"
+        # Paso 4. Aplicar el umbral de decisión del 50 %
+        etiqueta = "alto_riesgo" if probabilidad >= 0.50 else "bajo_riesgo"
  
         # Paso 5. Actualizar las métricas de predicción
         with metricas_lock:
@@ -323,10 +271,9 @@ def predict(datos: ClienteEntrada) -> PrediccionSalida:
             logger.warning("Valores fuera de rango histórico: %s", alertas)
             
         logger.info(
-            "Predicción | resultado=%s | probabilidad=%.4f | nivel=%s | alertas=%s",
+            "Predicción | resultado=%s | probabilidad=%.4f | alertas=%s",
             etiqueta,
             probabilidad,
-            nivel_riesgo,
             len(alertas),
         )
  
@@ -337,8 +284,6 @@ def predict(datos: ClienteEntrada) -> PrediccionSalida:
             version_modelo=VERSION_MODELO,
             autor=AUTOR,
             alertas_datos=alertas,
-            nivel_riesgo=nivel_riesgo,
-            recomendacion=recomendacion,
         )
  
     except Exception as exc:
